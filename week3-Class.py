@@ -54,26 +54,50 @@ class TodoList:
                 }
             tasks_as_dicts.append(task_dict)
         
-        with open("tasks_list.json","w") as file:
+        with open("tasks.json","w") as file:
             json.dump(tasks_as_dicts,file)
 
+    def load(self):
+        
+        try:
+            with open("tasks.json","r") as file:
+                loaded=json.load(file)
+                for details in loaded:
+                 new_task= Task(details['id'],details['name'],details['description'],details['status'])
+                 self.tasks.append(new_task)
+            if self.tasks:
+                self.next_id=max(task.id for task in self.tasks)
+            else:
+                self.next_id=0
+
+
+        except FileNotFoundError:
+            self.tasks=[]
         
         
     
 
-my_list = TodoList()
-# print(my_list.tasks)       # should print []
-# print(my_list.next_id)     # should print 0
-my_list.add_task("Buy milk", "Get 2% milk")
-my_list.add_task("Walk dog", "Evening walk")
-my_list.add_task("Buy bread", "Get sourdough")
+def main():
+    my_list = TodoList()
+    my_list.load()
+    while True:
+        command = input("\nCommand (add/list/done/remove/quit): ").strip().lower()
+        if command == "add":
+            name = input("Task name: ")
+            desc = input("Description: ")
+            my_list.add_task(name, desc)
+        elif command == "list":
+            my_list.list_task()
+        elif command == "done":
+            tid = int(input("Task id to mark done: "))
+            my_list.mark_done(tid)
+        elif command == "remove":
+            tid = int(input("Task id to remove: "))
+            my_list.remove_task(tid)
+        elif command == "quit":
+            my_list.save()
+            break
+        else:
+            print("Unknown command")
 
-my_list.mark_done(2)
-my_list.save()
-my_list.list_task()
-
-
-# print(my_list.tasks)            # what do you expect this to show?
-# for t in my_list.tasks:
-#     print(t) 
-        
+main()
